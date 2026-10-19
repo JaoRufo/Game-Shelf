@@ -3,4 +3,5 @@
 # dependencies
 node_modules/
 
-
+# APK baixado para depuração local
+*.apk
