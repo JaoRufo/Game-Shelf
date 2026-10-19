@@ -2,6 +2,10 @@
 
 # dependencies
 node_modules/
+.expo/
+.DS_Store
+*.log
+.env*
 
 # APK baixado para depuração local
 *.apk
