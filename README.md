@@ -7,7 +7,7 @@ O GameShelf é um aplicativo mobile para explorar jogos gratuitos e organizar um
 ## Aluno
 
 - Nome: João Victor Rufo Pereira
-- RGM: informar RGM
+- RGM: 41842341
 - Unifran - Análise e Desenvolvimento de Sistemas - Euller Da Silva Ferreira
 
 ## Telas
