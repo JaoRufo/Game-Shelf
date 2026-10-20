@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+.expo
 .expo/
 .DS_Store
 *.log
