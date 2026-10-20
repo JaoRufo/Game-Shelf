@@ -13,24 +13,21 @@ import LibraryScreen from "./LibraryScreen";
 export default function MainScreen({
   navigation,
   library,
+  onNotesChange,
   onStatusChange,
   onRemove,
 }) {
   const { width } = useWindowDimensions();
   const [activeTab, setActiveTab] = useState("home");
   const [homeAnimationKey, setHomeAnimationKey] = useState(0);
+  const [libraryAnimationKey, setLibraryAnimationKey] = useState(0);
   const slide = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    navigation.setOptions({
-      title: activeTab === "home" ? "Explorar" : "Minha biblioteca",
-    });
-  }, [activeTab, navigation]);
-
-  useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextState) => {
-      if (nextState === "active" && activeTab === "home") {
-        setHomeAnimationKey((current) => current + 1);
+      if (nextState === "active") {
+        if (activeTab === "home") setHomeAnimationKey((current) => current + 1);
+        if (activeTab === "library") setLibraryAnimationKey((current) => current + 1);
       }
     });
     return () => subscription.remove();
@@ -41,6 +38,7 @@ export default function MainScreen({
     if (nextTab === activeTab) return;
     setActiveTab(nextTab);
     if (nextTab === "home") setHomeAnimationKey((current) => current + 1);
+    if (nextTab === "library") setLibraryAnimationKey((current) => current + 1);
     Animated.timing(slide, {
       toValue: nextTab === "library" ? 1 : 0,
       duration: 320,
@@ -77,10 +75,12 @@ export default function MainScreen({
           <LibraryScreen
             navigation={navigation}
             library={library}
+            onNotesChange={onNotesChange}
             onStatusChange={onStatusChange}
             onRemove={onRemove}
             hideBottomNavigation
             onMainNavigate={changeTab}
+            animationTrigger={libraryAnimationKey}
           />
         </View>
       </Animated.View>

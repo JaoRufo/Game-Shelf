@@ -3,12 +3,14 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import MainScreen from "./src/screens/MainScreen";
 import GameDetailsScreen from "./src/screens/GameDetailsScreen";
 import LibraryScreen from "./src/screens/LibraryScreen";
 import {
   addToLibrary,
   removeFromLibrary,
+  updateLibraryNotes,
   updateLibraryStatus,
 } from "./src/utils/libraryHelpers";
 import { colors } from "./src/styles/theme";
@@ -49,21 +51,26 @@ export default function App() {
     setLibrary((current) => addToLibrary(current, game, status, notes));
   return (
     <NavigationContainer>
-      <StatusBar style="light" />
-      <Stack.Navigator
+      <SafeAreaProvider>
+        <StatusBar style="light" />
+        <Stack.Navigator
         screenOptions={{
           animation: "slide_from_right",
+          headerShown: false,
           headerStyle: { backgroundColor: colors.surface },
           headerTintColor: colors.text,
           headerTitleStyle: { fontWeight: "700" },
           contentStyle: { backgroundColor: colors.background },
         }}
-      >
-        <Stack.Screen name="Main" options={{ title: "Explorar", headerBackVisible: false }}>
+        >
+        <Stack.Screen name="Main" options={{ headerShown: false, header: () => null, headerLargeTitle: false }}>
           {(props) => (
             <MainScreen
               {...props}
               library={library}
+              onNotesChange={(id, notes) =>
+                setLibrary((current) => updateLibraryNotes(current, id, notes))
+              }
               onStatusChange={(id, status) =>
                 setLibrary((current) => updateLibraryStatus(current, id, status))
               }
@@ -71,7 +78,7 @@ export default function App() {
             />
           )}
         </Stack.Screen>
-        <Stack.Screen name="GameDetails" options={{ title: "Detalhes" }}>
+        <Stack.Screen name="GameDetails" options={{ title: "Detalhes", headerShown: true }}>
           {(props) => (
             <GameDetailsScreen
               {...props}
@@ -87,12 +94,14 @@ export default function App() {
                     ),
                   onRemove: (id) =>
                     setLibrary((current) => removeFromLibrary(current, id)),
+                  onNotesChange: (id, notes) =>
+                    setLibrary((current) => updateLibraryNotes(current, id, notes)),
                 },
               }}
             />
           )}
         </Stack.Screen>
-        <Stack.Screen name="Library" options={{ title: "Minha biblioteca" }}>
+        <Stack.Screen name="Library" options={{ title: "Meu inventário" }}>
           {(props) => (
             <LibraryScreen
               {...props}
@@ -108,7 +117,8 @@ export default function App() {
             />
           )}
         </Stack.Screen>
-      </Stack.Navigator>
+        </Stack.Navigator>
+      </SafeAreaProvider>
     </NavigationContainer>
   );
 }

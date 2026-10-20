@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Image,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -33,6 +34,7 @@ export default function GameDetailsScreen({ route, navigation }) {
   const [selectedStatus, setSelectedStatus] = useState(STATUS_OPTIONS[0]);
   const [notes, setNotes] = useState("");
   const library = route.params?.library || [];
+  const fromLibrary = route.params?.fromLibrary === true;
   const savedGame = library.find(
     (item) => String(item.id) === String(game?.id),
   );
@@ -74,18 +76,23 @@ export default function GameDetailsScreen({ route, navigation }) {
   const addGame = () => {
     if (!savedGame) {
       route.params?.onAdd?.(game);
-      setMessage("Jogo adicionado à biblioteca.");
+      setMessage("Jogo adicionado ao inventário.");
     }
   };
   const confirmAddGame = () => {
     route.params?.onAdd?.(game, selectedStatus, notes);
     setAddModalVisible(false);
-    setMessage("Jogo adicionado à biblioteca.");
+    setMessage("Jogo adicionado ao inventário.");
   };
   return (
     <ScrollView
       style={commonStyles.screen}
-      contentContainerStyle={commonStyles.content}
+      showsVerticalScrollIndicator={false}
+      persistentScrollbar={false}
+      scrollIndicatorInsets={Platform.OS === "ios" ? { right: 10000 } : undefined}
+      contentInsetAdjustmentBehavior="never"
+      bounces={false}
+      contentContainerStyle={[commonStyles.content, styles.scrollContainer]}
     >
       {game.thumbnail && !imageFailed ? (
         <Image
@@ -123,11 +130,11 @@ export default function GameDetailsScreen({ route, navigation }) {
         />
       </View>
       <PrimaryButton
-        label={savedGame ? "Já está na biblioteca" : "Adicionar à biblioteca"}
+        label={savedGame ? "Já está no inventário" : "Adicionar ao inventário"}
         onPress={() => setAddModalVisible(true)}
         disabled={Boolean(savedGame)}
       />
-      {savedGame ? (
+      {savedGame && fromLibrary ? (
         <View style={styles.savedBox}>
           <Text style={styles.savedTitle}>
             Status atual: {savedGame.status}
@@ -147,29 +154,21 @@ export default function GameDetailsScreen({ route, navigation }) {
               </Text>
             ))}
           </View>
-          <PrimaryButton
-            label="Remover da biblioteca"
-            variant="danger"
-            onPress={() => {
-              route.params?.onRemove?.(game.id);
-              setMessage("Jogo removido da biblioteca.");
-            }}
-          />
         </View>
       ) : null}
       <Modal visible={addModalVisible} transparent animationType="fade" onRequestClose={() => setAddModalVisible(false)}>
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Adicionar à biblioteca</Text>
+            <Text style={styles.modalTitle}>Adicionar ao inventário</Text>
             <Text style={styles.modalLabel}>Status atual:</Text>
-            <View style={styles.statusRow}>
+            <View style={[styles.statusRow, styles.modalStatusRow]}>
               {STATUS_OPTIONS.map((status) => (
                 <Pressable key={status} onPress={() => setSelectedStatus(status)} style={[styles.statusChipButton, selectedStatus === status && styles.activeStatusButton]}>
                   <Text style={[styles.statusChipText, selectedStatus === status && styles.activeStatusText]}>{status}</Text>
                 </Pressable>
               ))}
             </View>
-            <Text style={styles.modalLabel}>Observações (opcional)</Text>
+            <Text style={[styles.modalLabel, styles.notesLabel]}>Observações (opcional)</Text>
             <TextInput value={notes} onChangeText={setNotes} placeholder="Ex.: jogar com amigos" placeholderTextColor={colors.muted} multiline style={styles.notesInput} />
             <View style={styles.modalActions}>
               <PrimaryButton label="Cancelar" variant="secondary" onPress={() => setAddModalVisible(false)} />
@@ -182,6 +181,7 @@ export default function GameDetailsScreen({ route, navigation }) {
   );
 }
 const styles = StyleSheet.create({
+  scrollContainer: { scrollbarWidth: "none" },
   cover: {
     width: "100%",
     height: 210,
@@ -244,10 +244,12 @@ const styles = StyleSheet.create({
   statusChipText: { color: colors.muted },
   activeStatusText: { color: "#fff", fontWeight: "700" },
   modalBackdrop: { alignItems: "center", backgroundColor: "rgba(5, 7, 18, 0.78)", flex: 1, justifyContent: "center", padding: 22 },
-  modalCard: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 18, borderWidth: 1, padding: 20, width: "100%" },
-  modalTitle: { color: colors.text, fontSize: 20, fontWeight: "800", marginBottom: 20 },
+  modalCard: { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 18, borderWidth: 1, padding: 24, width: "100%" },
+  modalTitle: { color: colors.text, fontSize: 20, fontWeight: "800", lineHeight: 26, marginBottom: 22 },
   modalLabel: { color: colors.text, fontSize: 14, fontWeight: "700", marginBottom: 10 },
-  notesInput: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 10, borderWidth: 1, color: colors.text, minHeight: 76, padding: 12, textAlignVertical: "top" },
-  modalActions: { flexDirection: "row", gap: 10, justifyContent: "flex-end", marginTop: 18 },
+  modalStatusRow: { marginBottom: 20 },
+  notesLabel: { marginTop: 2 },
+  notesInput: { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 10, borderWidth: 1, color: colors.text, minHeight: 84, padding: 12, textAlignVertical: "top" },
+  modalActions: { flexDirection: "row", gap: 12, justifyContent: "flex-end", marginTop: 22 },
   center: { alignItems: "center", justifyContent: "center" },
 });

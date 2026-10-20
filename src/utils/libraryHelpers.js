@@ -8,5 +8,8 @@ export const addToLibrary = (library, game, status = 'Quero jogar', notes = '') 
 export const updateLibraryStatus = (library, id, status) =>
   library.map((item) => (String(item.id) === String(id) ? { ...item, status } : item));
 
+export const updateLibraryNotes = (library, id, notes) =>
+  library.map((item) => (String(item.id) === String(id) ? { ...item, notes: notes.trim() } : item));
+
 export const removeFromLibrary = (library, id) =>
   library.filter((item) => String(item.id) !== String(id));

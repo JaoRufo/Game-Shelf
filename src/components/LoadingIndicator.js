@@ -50,7 +50,7 @@ export default function LoadingIndicator({ label = "Carregando catálogo" }) {
         />
       </View>
       <Text style={styles.label}>{label.toUpperCase()}</Text>
-      <Text style={styles.caption}>Preparando sua biblioteca</Text>
+      <Text style={styles.caption}>Preparando seu inventário</Text>
     </View>
   );
 }

@@ -14,7 +14,7 @@ export const colors = {
 };
 
 export const commonStyles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+  screen: { flex: 1, backgroundColor: colors.background, overflow: "hidden" },
   content: { padding: 20, paddingBottom: 32 },
   title: { color: colors.text, fontSize: 28, fontWeight: "800" },
   subtitle: { color: colors.muted, fontSize: 14, lineHeight: 20, marginTop: 6 },

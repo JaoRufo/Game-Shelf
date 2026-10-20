@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
+  Platform,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
-  Animated,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import GameCard from "../components/GameCard";
 import SearchBar from "../components/SearchBar";
 import PrimaryButton from "../components/PrimaryButton";
@@ -16,6 +16,7 @@ import localGames from "../data/games.json";
 import { fetchGames } from "../services/freeToGameApi";
 import { colors, commonStyles } from "../styles/theme";
 import BottomNavigation from "../components/BottomNavigation";
+import AnimatedBrandTitle from "../components/AnimatedBrandTitle";
 
 const PAGE_SIZE = 10;
 
@@ -32,33 +33,6 @@ export default function ExploreScreen({
   const [usingFallback, setUsingFallback] = useState(false);
   const [error, setError] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
-  const titleAnimation = useRef(new Animated.Value(0)).current;
-  const shineAnimation = useRef(new Animated.Value(-150)).current;
-
-  useEffect(() => {
-    titleAnimation.setValue(0);
-    shineAnimation.setValue(-150);
-    Animated.parallel([
-      Animated.timing(titleAnimation, {
-        toValue: 1,
-        duration: 650,
-        useNativeDriver: true,
-      }),
-      Animated.sequence([
-        Animated.delay(450),
-        Animated.timing(shineAnimation, {
-          toValue: 150,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ]),
-    ]).start();
-    return () => {
-      titleAnimation.stopAnimation();
-      shineAnimation.stopAnimation();
-    };
-  }, [animationTrigger, shineAnimation, titleAnimation]);
-
   useEffect(() => {
     const controller = new AbortController();
     let mounted = true;
@@ -127,51 +101,30 @@ export default function ExploreScreen({
     [currentPage, totalPages],
   );
   const openDetails = useCallback(
-    (game) => navigation.navigate("GameDetails", { game }),
+    (game) => navigation.navigate("GameDetails", { game, fromLibrary: false }),
     [navigation],
   );
 
   return (
-    <SafeAreaView style={commonStyles.screen}>
+    <SafeAreaView edges={["top", "left", "right"]} style={commonStyles.screen}>
       <FlatList
         data={paginatedGames}
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        persistentScrollbar={false}
+        scrollIndicatorInsets={Platform.OS === "ios" ? { right: 10000 } : undefined}
+        contentInsetAdjustmentBehavior="never"
+        bounces={false}
         extraData={currentPage}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
           <GameCard game={item} onPress={() => openDetails(item)} />
         )}
-        contentContainerStyle={[commonStyles.content, { paddingBottom: 112 }]}
+        contentContainerStyle={[commonStyles.content, { paddingBottom: 112, paddingTop: 0 }]}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <>
-            <View style={styles.brandWrapper}>
-              <Animated.Text
-                style={[
-                  commonStyles.title,
-                  styles.brandTitle,
-                  {
-                    opacity: titleAnimation,
-                    transform: [
-                      {
-                        scale: titleAnimation.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0.86, 1],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              >
-                GameShelf
-              </Animated.Text>
-              <Animated.View
-                pointerEvents="none"
-                style={[
-                  styles.titleShine,
-                  { transform: [{ translateX: shineAnimation }, { skewX: "-18deg" }] },
-                ]}
-              />
-            </View>
+            <AnimatedBrandTitle animationTrigger={animationTrigger}>GameShelf</AnimatedBrandTitle>
             <Text style={commonStyles.subtitle}>
               Descubra, organize e acompanhe seus próximos jogos.
             </Text>
@@ -195,7 +148,12 @@ export default function ExploreScreen({
             <Text style={styles.filterLabel}>Gênero</Text>
             <FlatList
               horizontal
+              style={styles.scrollContainer}
               showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
+              persistentScrollbar={false}
+              scrollIndicatorInsets={Platform.OS === "ios" ? { right: 10000 } : undefined}
+              bounces={false}
               data={genres}
               keyExtractor={(item) => item}
               renderItem={({ item }) => (
@@ -292,26 +250,7 @@ export default function ExploreScreen({
 }
 
 const styles = StyleSheet.create({
-  brandWrapper: {
-    alignItems: "center",
-    alignSelf: "center",
-    overflow: "hidden",
-  },
-  brandTitle: {
-    color: colors.primary,
-    letterSpacing: 0.5,
-    textAlign: "center",
-    textShadowColor: "rgba(139, 92, 246, 0.42)",
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
-  },
-  titleShine: {
-    backgroundColor: "rgba(255, 255, 255, 0.72)",
-    height: 52,
-    position: "absolute",
-    top: -2,
-    width: 18,
-  },
+  scrollContainer: { scrollbarWidth: "none" },
   filterLabel: {
     color: colors.text,
     fontSize: 14,
