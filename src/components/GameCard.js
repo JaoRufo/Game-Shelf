@@ -16,7 +16,7 @@ export default function GameCard({ game, onPress, status }) {
           source={{ uri: game.thumbnail }}
           onError={() => setImageFailed(true)}
           style={styles.image}
-          resizeMode="cover"
+          resizeMode="contain"
         />
       ) : (
         <View style={styles.imageFallback}>
@@ -51,9 +51,9 @@ const styles = StyleSheet.create({
     minHeight: 108,
   },
   pressed: { opacity: 0.82 },
-  image: { width: 116, height: 108, backgroundColor: colors.surfaceElevated },
+  image: { width: 108, height: 108, backgroundColor: colors.surfaceElevated },
   imageFallback: {
-    width: 116,
+    width: 108,
     height: 108,
     alignItems: "center",
     justifyContent: "center",

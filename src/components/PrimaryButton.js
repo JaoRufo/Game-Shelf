@@ -16,6 +16,7 @@ export default function PrimaryButton({
       style={({ pressed }) => [
         styles.button,
         variant === "danger" && styles.danger,
+        variant === "secondary" && styles.secondary,
         disabled && styles.disabled,
         pressed && !disabled && styles.pressed,
       ]}
@@ -35,6 +36,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   danger: { backgroundColor: colors.danger },
+  secondary: { backgroundColor: colors.surfaceElevated },
   disabled: { opacity: 0.45 },
   pressed: { transform: [{ scale: 0.98 }], opacity: 0.88 },
   label: { color: "#fff", fontSize: 15, fontWeight: "700" },

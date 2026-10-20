@@ -4,19 +4,22 @@ import GameCard from "../components/GameCard";
 import PrimaryButton from "../components/PrimaryButton";
 import { STATUS_OPTIONS } from "../utils/libraryHelpers";
 import { colors, commonStyles } from "../styles/theme";
+import BottomNavigation from "../components/BottomNavigation";
 
 export default function LibraryScreen({
   library,
   onStatusChange,
   onRemove,
   navigation,
+  hideBottomNavigation = false,
+  onMainNavigate,
 }) {
   return (
     <SafeAreaView style={commonStyles.screen}>
       <FlatList
         data={library}
         keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={commonStyles.content}
+        contentContainerStyle={[commonStyles.content, { paddingBottom: 112 }]}
         renderItem={({ item }) => (
           <View style={styles.item}>
             <GameCard
@@ -43,6 +46,7 @@ export default function LibraryScreen({
               variant="danger"
               onPress={() => onRemove(item.id)}
             />
+            {item.notes ? <Text style={styles.notes}>Observação: {item.notes}</Text> : null}
           </View>
         )}
         ListEmptyComponent={
@@ -54,11 +58,17 @@ export default function LibraryScreen({
             </Text>
             <PrimaryButton
               label="Explorar jogos"
-              onPress={() => navigation.navigate("Explore")}
+              onPress={() => (onMainNavigate ? onMainNavigate("Explore") : navigation.replace("Explore"))}
             />
           </View>
         }
       />
+      {!hideBottomNavigation ? (
+        <BottomNavigation
+          active="library"
+          onNavigate={onMainNavigate || ((screen) => navigation.replace(screen))}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -87,4 +97,5 @@ const styles = StyleSheet.create({
   },
   empty: { alignItems: "center", paddingTop: 80 },
   emptyTitle: { color: colors.text, fontSize: 20, fontWeight: "700" },
+  notes: { color: colors.muted, fontSize: 13, marginTop: 8 },
 });

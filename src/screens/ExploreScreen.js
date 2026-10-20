@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Animated,
 } from "react-native";
 import GameCard from "../components/GameCard";
 import SearchBar from "../components/SearchBar";
@@ -14,10 +15,15 @@ import LoadingIndicator from "../components/LoadingIndicator";
 import localGames from "../data/games.json";
 import { fetchGames } from "../services/freeToGameApi";
 import { colors, commonStyles } from "../styles/theme";
+import BottomNavigation from "../components/BottomNavigation";
 
 const PAGE_SIZE = 10;
 
-export default function ExploreScreen({ navigation }) {
+export default function ExploreScreen({
+  navigation,
+  hideBottomNavigation = false,
+  animationTrigger = 0,
+}) {
   const [games, setGames] = useState([]);
   const [query, setQuery] = useState("");
   const [genre, setGenre] = useState("Todos");
@@ -26,6 +32,32 @@ export default function ExploreScreen({ navigation }) {
   const [usingFallback, setUsingFallback] = useState(false);
   const [error, setError] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
+  const titleAnimation = useRef(new Animated.Value(0)).current;
+  const shineAnimation = useRef(new Animated.Value(-150)).current;
+
+  useEffect(() => {
+    titleAnimation.setValue(0);
+    shineAnimation.setValue(-150);
+    Animated.parallel([
+      Animated.timing(titleAnimation, {
+        toValue: 1,
+        duration: 650,
+        useNativeDriver: true,
+      }),
+      Animated.sequence([
+        Animated.delay(450),
+        Animated.timing(shineAnimation, {
+          toValue: 150,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+    return () => {
+      titleAnimation.stopAnimation();
+      shineAnimation.stopAnimation();
+    };
+  }, [animationTrigger, shineAnimation, titleAnimation]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -108,11 +140,38 @@ export default function ExploreScreen({ navigation }) {
         renderItem={({ item }) => (
           <GameCard game={item} onPress={() => openDetails(item)} />
         )}
-        contentContainerStyle={commonStyles.content}
+        contentContainerStyle={[commonStyles.content, { paddingBottom: 112 }]}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <>
-            <Text style={commonStyles.title}>GameShelf</Text>
+            <View style={styles.brandWrapper}>
+              <Animated.Text
+                style={[
+                  commonStyles.title,
+                  styles.brandTitle,
+                  {
+                    opacity: titleAnimation,
+                    transform: [
+                      {
+                        scale: titleAnimation.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.86, 1],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                GameShelf
+              </Animated.Text>
+              <Animated.View
+                pointerEvents="none"
+                style={[
+                  styles.titleShine,
+                  { transform: [{ translateX: shineAnimation }, { skewX: "-18deg" }] },
+                ]}
+              />
+            </View>
             <Text style={commonStyles.subtitle}>
               Descubra, organize e acompanhe seus próximos jogos.
             </Text>
@@ -220,11 +279,39 @@ export default function ExploreScreen({ navigation }) {
           ) : null
         }
       />
+      {!hideBottomNavigation ? (
+        <BottomNavigation
+          active="home"
+          onNavigate={(screen) => {
+            if (screen !== "Explore") navigation.replace(screen);
+          }}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  brandWrapper: {
+    alignItems: "center",
+    alignSelf: "center",
+    overflow: "hidden",
+  },
+  brandTitle: {
+    color: colors.primary,
+    letterSpacing: 0.5,
+    textAlign: "center",
+    textShadowColor: "rgba(139, 92, 246, 0.42)",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  titleShine: {
+    backgroundColor: "rgba(255, 255, 255, 0.72)",
+    height: 52,
+    position: "absolute",
+    top: -2,
+    width: 18,
+  },
   filterLabel: {
     color: colors.text,
     fontSize: 14,

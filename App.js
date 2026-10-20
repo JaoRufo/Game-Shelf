@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Text } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
-import ExploreScreen from "./src/screens/ExploreScreen";
+import MainScreen from "./src/screens/MainScreen";
 import GameDetailsScreen from "./src/screens/GameDetailsScreen";
 import LibraryScreen from "./src/screens/LibraryScreen";
 import {
@@ -46,32 +45,32 @@ export default function App() {
         () => {},
       );
   }, [library, storageReady]);
-  const addGame = (game) =>
-    setLibrary((current) => addToLibrary(current, game));
+  const addGame = (game, status, notes) =>
+    setLibrary((current) => addToLibrary(current, game, status, notes));
   return (
     <NavigationContainer>
       <StatusBar style="light" />
       <Stack.Navigator
         screenOptions={{
+          animation: "slide_from_right",
           headerStyle: { backgroundColor: colors.surface },
           headerTintColor: colors.text,
           headerTitleStyle: { fontWeight: "700" },
           contentStyle: { backgroundColor: colors.background },
         }}
       >
-        <Stack.Screen
-          name="Explore"
-          component={ExploreScreen}
-          options={({ navigation }) => ({
-            title: "Explorar",
-            headerRight: () => (
-              <TextButton
-                label="Biblioteca"
-                onPress={() => navigation.navigate("Library")}
-              />
-            ),
-          })}
-        />
+        <Stack.Screen name="Main" options={{ title: "Explorar", headerBackVisible: false }}>
+          {(props) => (
+            <MainScreen
+              {...props}
+              library={library}
+              onStatusChange={(id, status) =>
+                setLibrary((current) => updateLibraryStatus(current, id, status))
+              }
+              onRemove={(id) => setLibrary((current) => removeFromLibrary(current, id))}
+            />
+          )}
+        </Stack.Screen>
         <Stack.Screen name="GameDetails" options={{ title: "Detalhes" }}>
           {(props) => (
             <GameDetailsScreen
@@ -114,13 +113,3 @@ export default function App() {
   );
 }
 
-function TextButton({ label, onPress }) {
-  return (
-    <Text
-      onPress={onPress}
-      style={{ color: colors.primary, fontWeight: "700", marginRight: 14 }}
-    >
-      {label}
-    </Text>
-  );
-}
