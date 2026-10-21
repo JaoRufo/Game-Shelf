@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   AppState,
@@ -7,6 +7,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import BottomNavigation from "../components/BottomNavigation";
+import { useFocusEffect } from "@react-navigation/native";
 import ExploreScreen from "./ExploreScreen";
 import LibraryScreen from "./LibraryScreen";
 
@@ -21,6 +22,8 @@ export default function MainScreen({
   const [activeTab, setActiveTab] = useState("home");
   const [homeAnimationKey, setHomeAnimationKey] = useState(0);
   const [libraryAnimationKey, setLibraryAnimationKey] = useState(0);
+  const [homeScrollTrigger, setHomeScrollTrigger] = useState(0);
+  const [libraryScrollTrigger, setLibraryScrollTrigger] = useState(0);
   const slide = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -33,12 +36,21 @@ export default function MainScreen({
     return () => subscription.remove();
   }, [activeTab]);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (activeTab === "home") setHomeScrollTrigger((current) => current + 1);
+      if (activeTab === "library") setLibraryScrollTrigger((current) => current + 1);
+    }, [activeTab]),
+  );
+
   const changeTab = (screen) => {
     const nextTab = screen === "Library" ? "library" : "home";
     if (nextTab === activeTab) return;
     setActiveTab(nextTab);
     if (nextTab === "home") setHomeAnimationKey((current) => current + 1);
     if (nextTab === "library") setLibraryAnimationKey((current) => current + 1);
+    if (nextTab === "home") setHomeScrollTrigger((current) => current + 1);
+    if (nextTab === "library") setLibraryScrollTrigger((current) => current + 1);
     Animated.timing(slide, {
       toValue: nextTab === "library" ? 1 : 0,
       duration: 320,
@@ -69,6 +81,7 @@ export default function MainScreen({
             navigation={navigation}
             hideBottomNavigation
             animationTrigger={homeAnimationKey}
+            scrollToTopTrigger={homeScrollTrigger}
           />
         </View>
         <View style={{ width }}>
@@ -81,6 +94,7 @@ export default function MainScreen({
             hideBottomNavigation
             onMainNavigate={changeTab}
             animationTrigger={libraryAnimationKey}
+            scrollToTopTrigger={libraryScrollTrigger}
           />
         </View>
       </Animated.View>

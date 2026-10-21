@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GameCard from "../components/GameCard";
@@ -8,12 +8,13 @@ import { colors, commonStyles } from "../styles/theme";
 import BottomNavigation from "../components/BottomNavigation";
 import AnimatedBrandTitle from "../components/AnimatedBrandTitle";
 
-export default function LibraryScreen({ library, navigation, onRemove, onNotesChange, hideBottomNavigation = false, onMainNavigate, animationTrigger = 0 }) {
+export default function LibraryScreen({ library, navigation, onRemove, onNotesChange, hideBottomNavigation = false, onMainNavigate, animationTrigger = 0, scrollToTopTrigger = 0 }) {
   const [activeFilter, setActiveFilter] = useState("Todos");
   const [selectedGame, setSelectedGame] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
   const [noteDraft, setNoteDraft] = useState("");
+  const listRef = useRef(null);
   const filters = ["Todos", ...STATUS_OPTIONS];
   const filteredLibrary = useMemo(
     () => activeFilter === "Todos" ? library : library.filter((item) => item.status === activeFilter),
@@ -34,9 +35,16 @@ export default function LibraryScreen({ library, navigation, onRemove, onNotesCh
     setEditVisible(false);
   };
 
+  useEffect(() => {
+    if (scrollToTopTrigger > 0) {
+      listRef.current?.scrollToOffset({ offset: 0, animated: true });
+    }
+  }, [scrollToTopTrigger]);
+
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={commonStyles.screen}>
       <FlatList
+        ref={listRef}
         data={filteredLibrary}
         style={styles.scrollContainer}
         showsVerticalScrollIndicator={false}

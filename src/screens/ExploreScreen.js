@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   Platform,
@@ -24,6 +24,7 @@ export default function ExploreScreen({
   navigation,
   hideBottomNavigation = false,
   animationTrigger = 0,
+  scrollToTopTrigger = 0,
 }) {
   const [games, setGames] = useState([]);
   const [query, setQuery] = useState("");
@@ -33,6 +34,13 @@ export default function ExploreScreen({
   const [usingFallback, setUsingFallback] = useState(false);
   const [error, setError] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
+  const listRef = useRef(null);
+
+  useEffect(() => {
+    if (scrollToTopTrigger > 0) {
+      listRef.current?.scrollToOffset({ offset: 0, animated: true });
+    }
+  }, [scrollToTopTrigger]);
   useEffect(() => {
     const controller = new AbortController();
     let mounted = true;
@@ -108,6 +116,7 @@ export default function ExploreScreen({
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={commonStyles.screen}>
       <FlatList
+        ref={listRef}
         data={paginatedGames}
         style={styles.scrollContainer}
         showsVerticalScrollIndicator={false}

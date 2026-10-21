@@ -7,6 +7,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import MainScreen from "./src/screens/MainScreen";
 import GameDetailsScreen from "./src/screens/GameDetailsScreen";
 import LibraryScreen from "./src/screens/LibraryScreen";
+import StartupSplash from "./src/components/StartupSplash";
 import {
   addToLibrary,
   removeFromLibrary,
@@ -21,6 +22,11 @@ const STORAGE_KEY = "@gameshelf/library";
 export default function App() {
   const [library, setLibrary] = useState([]);
   const [storageReady, setStorageReady] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  useEffect(() => {
+    const timeout = setTimeout(() => setShowSplash(false), 1800);
+    return () => clearTimeout(timeout);
+  }, []);
   useEffect(() => {
     let mounted = true;
     AsyncStorage.getItem(STORAGE_KEY)
@@ -49,6 +55,7 @@ export default function App() {
   }, [library, storageReady]);
   const addGame = (game, status, notes) =>
     setLibrary((current) => addToLibrary(current, game, status, notes));
+  if (showSplash) return <StartupSplash />;
   return (
     <NavigationContainer>
       <SafeAreaProvider>

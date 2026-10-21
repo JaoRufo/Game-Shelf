@@ -5,6 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/logo-game-shelf-transparent.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0d1020"
+    },
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true
