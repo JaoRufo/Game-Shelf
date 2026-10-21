@@ -3,6 +3,7 @@ import { FlatList, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View
 import { SafeAreaView } from "react-native-safe-area-context";
 import GameCard from "../components/GameCard";
 import PrimaryButton from "../components/PrimaryButton";
+import FeedbackModal from "../components/FeedbackModal";
 import { STATUS_OPTIONS } from "../utils/libraryHelpers";
 import { colors, commonStyles } from "../styles/theme";
 import BottomNavigation from "../components/BottomNavigation";
@@ -14,6 +15,7 @@ export default function LibraryScreen({ library, navigation, onRemove, onNotesCh
   const [menuVisible, setMenuVisible] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
   const [noteDraft, setNoteDraft] = useState("");
+  const [feedback, setFeedback] = useState(null);
   const listRef = useRef(null);
   const filters = ["Todos", ...STATUS_OPTIONS];
   const filteredLibrary = useMemo(
@@ -31,8 +33,43 @@ export default function LibraryScreen({ library, navigation, onRemove, onNotesCh
     setEditVisible(true);
   };
   const saveNotes = () => {
-    if (selectedGame) onNotesChange?.(selectedGame.id, noteDraft);
+    if (!selectedGame || !onNotesChange) {
+      setFeedback({
+        type: "error",
+        title: "Não foi possível salvar",
+        message: "A observação não pôde ser atualizada.",
+      });
+      return;
+    }
+    const currentNotes = selectedGame.notes || "";
+    if (noteDraft.trim() === currentNotes.trim()) {
+      setEditVisible(false);
+      return;
+    }
+    onNotesChange(selectedGame.id, noteDraft);
     setEditVisible(false);
+    setFeedback({
+      type: "success",
+      title: "Observação salva",
+      message: "A observação foi atualizada com sucesso.",
+    });
+  };
+  const removeSelectedGame = () => {
+    if (!selectedGame || !onRemove) {
+      setFeedback({
+        type: "error",
+        title: "Não foi possível remover",
+        message: "O jogo não pôde ser removido do inventário.",
+      });
+      return;
+    }
+    onRemove(selectedGame.id);
+    setMenuVisible(false);
+    setFeedback({
+      type: "success",
+      title: "Jogo removido",
+      message: "O jogo foi removido do seu inventário.",
+    });
   };
 
   useEffect(() => {
@@ -91,7 +128,7 @@ export default function LibraryScreen({ library, navigation, onRemove, onNotesCh
           <View style={styles.menuCard}>
             <Text style={styles.menuTitle}>{selectedGame?.title}</Text>
             <Pressable style={styles.menuOption} onPress={openEditor}><Text style={styles.menuText}>Editar observações</Text></Pressable>
-            <Pressable style={styles.menuOption} onPress={() => { onRemove?.(selectedGame?.id); setMenuVisible(false); }}><Text style={styles.removeText}>Remover do inventário</Text></Pressable>
+            <Pressable style={styles.menuOption} onPress={removeSelectedGame}><Text style={styles.removeText}>Remover do inventário</Text></Pressable>
           </View>
         </Pressable>
       </Modal>
@@ -108,6 +145,13 @@ export default function LibraryScreen({ library, navigation, onRemove, onNotesCh
           </View>
         </View>
       </Modal>
+      <FeedbackModal
+        visible={Boolean(feedback)}
+        type={feedback?.type}
+        title={feedback?.title}
+        message={feedback?.message}
+        onClose={() => setFeedback(null)}
+      />
     </SafeAreaView>
   );
 }

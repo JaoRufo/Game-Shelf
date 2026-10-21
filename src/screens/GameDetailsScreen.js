@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
+import FeedbackModal from "../components/FeedbackModal";
 import { STATUS_OPTIONS } from "../utils/libraryHelpers";
 import { fetchGameDetails } from "../services/freeToGameApi";
 import { colors, commonStyles } from "../styles/theme";
@@ -33,6 +34,7 @@ export default function GameDetailsScreen({ route }) {
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(STATUS_OPTIONS[0]);
   const [notes, setNotes] = useState("");
+  const [feedback, setFeedback] = useState(null);
   const library = route.params?.library || [];
   const fromLibrary = route.params?.fromLibrary === true;
   const savedGame = library.find(
@@ -74,9 +76,46 @@ export default function GameDetailsScreen({ route }) {
       </View>
     );
   const confirmAddGame = () => {
+    if (savedGame) {
+      setFeedback({
+        type: "error",
+        title: "Jogo já adicionado",
+        message: "Este jogo já está no seu inventário.",
+      });
+      return;
+    }
+    if (!route.params?.onAdd) {
+      setFeedback({
+        type: "error",
+        title: "Não foi possível adicionar",
+        message: "A biblioteca não está disponível no momento.",
+      });
+      return;
+    }
     route.params?.onAdd?.(game, selectedStatus, notes);
     setAddModalVisible(false);
-    setMessage("Jogo adicionado ao inventário.");
+    setFeedback({
+      type: "success",
+      title: "Jogo adicionado",
+      message: "O jogo foi salvo no seu inventário.",
+    });
+  };
+  const changeStatus = (status) => {
+    if (savedGame?.status === status) return;
+    if (!route.params?.onStatusChange) {
+      setFeedback({
+        type: "error",
+        title: "Não foi possível atualizar",
+        message: "A biblioteca não está disponível no momento.",
+      });
+      return;
+    }
+    route.params.onStatusChange(game.id, status);
+    setFeedback({
+      type: "success",
+      title: "Status atualizado",
+      message: `O jogo agora está marcado como "${status}".`,
+    });
   };
   return (
     <ScrollView
@@ -142,7 +181,7 @@ export default function GameDetailsScreen({ route }) {
             {STATUS_OPTIONS.map((status) => (
               <Text
                 key={status}
-                onPress={() => route.params?.onStatusChange?.(game.id, status)}
+                onPress={() => changeStatus(status)}
                 style={[
                   styles.statusChip,
                   savedGame.status === status && styles.activeStatus,
@@ -207,6 +246,13 @@ export default function GameDetailsScreen({ route }) {
           </View>
         </View>
       </Modal>
+      <FeedbackModal
+        visible={Boolean(feedback)}
+        type={feedback?.type}
+        title={feedback?.title}
+        message={feedback?.message}
+        onClose={() => setFeedback(null)}
+      />
     </ScrollView>
   );
 }
