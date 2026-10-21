@@ -11,8 +11,10 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import PrimaryButton from "../components/PrimaryButton";
 import FeedbackModal from "../components/FeedbackModal";
+import AnimatedBrandTitle from "../components/AnimatedBrandTitle";
 import { STATUS_OPTIONS } from "../utils/libraryHelpers";
 import { fetchGameDetails } from "../services/freeToGameApi";
 import { colors, commonStyles } from "../styles/theme";
@@ -40,6 +42,7 @@ export default function GameDetailsScreen({ route }) {
   const savedGame = library.find(
     (item) => String(item.id) === String(game?.id),
   );
+  const savedNotes = savedGame?.notes?.trim() || "";
   useEffect(() => {
     const controller = new AbortController();
     let mounted = true;
@@ -118,17 +121,25 @@ export default function GameDetailsScreen({ route }) {
     });
   };
   return (
-    <ScrollView
-      style={commonStyles.screen}
-      showsVerticalScrollIndicator={false}
-      persistentScrollbar={false}
-      scrollIndicatorInsets={
-        Platform.OS === "ios" ? { right: 10000 } : undefined
-      }
-      contentInsetAdjustmentBehavior="never"
-      bounces={false}
-      contentContainerStyle={[commonStyles.content, styles.scrollContainer]}
-    >
+    <SafeAreaView edges={["top", "left", "right"]} style={commonStyles.screen}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        persistentScrollbar={false}
+        scrollIndicatorInsets={
+          Platform.OS === "ios" ? { right: 10000 } : undefined
+        }
+        contentInsetAdjustmentBehavior="never"
+        bounces={false}
+        contentContainerStyle={[
+          commonStyles.content,
+          styles.scrollContainer,
+          styles.detailsContent,
+        ]}
+      >
+      <AnimatedBrandTitle containerStyle={styles.detailsTitle}>
+        Detalhes
+      </AnimatedBrandTitle>
       {game.thumbnail && !imageFailed ? (
         <Image
           source={{ uri: game.thumbnail }}
@@ -164,19 +175,25 @@ export default function GameDetailsScreen({ route }) {
           }
         />
       </View>
-      <PrimaryButton
-        label={savedGame ? "Já está no inventário" : "Adicionar ao inventário"}
-        onPress={() => setAddModalVisible(true)}
-        disabled={Boolean(savedGame)}
-      />
+      <View style={styles.inventoryButton}>
+        <PrimaryButton
+          label={savedGame ? "Já está no inventário" : "Adicionar ao inventário"}
+          onPress={() => setAddModalVisible(true)}
+          disabled={Boolean(savedGame)}
+        />
+      </View>
       {savedGame && fromLibrary ? (
         <View style={styles.savedBox}>
           <Text style={styles.savedTitle}>
             Status atual: {savedGame.status}
           </Text>
-          {savedGame.notes ? (
-            <Text style={styles.savedNotes}>Observação: {savedGame.notes}</Text>
+          {savedNotes ? (
+            <View style={styles.savedNotesBox}>
+              <Text style={styles.savedNotesLabel}>Observações</Text>
+              <Text style={styles.savedNotes}>{savedNotes}</Text>
+            </View>
           ) : null}
+          <Text style={styles.statusLabel}>Alterar status</Text>
           <View style={styles.statusRow}>
             {STATUS_OPTIONS.map((status) => (
               <Text
@@ -253,11 +270,15 @@ export default function GameDetailsScreen({ route }) {
         message={feedback?.message}
         onClose={() => setFeedback(null)}
       />
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
+  scrollView: { flex: 1 },
   scrollContainer: { scrollbarWidth: "none" },
+  detailsContent: { paddingTop: 0 },
+  detailsTitle: { marginBottom: 14 },
   cover: {
     width: "100%",
     height: 210,
@@ -268,6 +289,7 @@ const styles = StyleSheet.create({
   coverFallback: { alignItems: "center", justifyContent: "center" },
   fallback: { color: colors.muted },
   loader: { marginVertical: 10 },
+  inventoryButton: { marginBottom: 24 },
   message: { color: colors.muted, fontSize: 13, marginTop: 10 },
   description: {
     color: colors.muted,
@@ -292,14 +314,32 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   savedBox: {
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
-    marginTop: 20,
-    paddingTop: 18,
-    gap: 12,
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 16,
+    borderWidth: 1,
+    gap: 16,
+    marginBottom: 8,
+    padding: 18,
   },
   savedTitle: { color: colors.success, fontWeight: "700" },
-  savedNotes: { color: colors.muted, fontSize: 13 },
+  savedNotesBox: {
+    backgroundColor: colors.background,
+    borderColor: colors.primary,
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 14,
+  },
+  savedNotesLabel: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 0.4,
+    marginBottom: 6,
+    textTransform: "uppercase",
+  },
+  savedNotes: { color: colors.text, fontSize: 14, lineHeight: 21 },
+  statusLabel: { color: colors.muted, fontSize: 13, fontWeight: "700" },
   statusRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   statusChip: {
     color: colors.muted,

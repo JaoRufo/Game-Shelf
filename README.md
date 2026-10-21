@@ -41,7 +41,7 @@ Quando a API não está disponível, o app utiliza o catálogo local em `src/dat
 
 demo/demo.mp4
 
-Link do Drive: https://drive.google.com/file/d/1aiWV35jZJ8WTOGjPvdREas_fdKWLEoUT/view?usp=drive_link
+Link do Drive: https://drive.google.com/file/d/1E4iKqjJwdaHwMopXqP26wLObPrjYA2z1/view?usp=drive_link
 
 ## Como executar
 

@@ -2,7 +2,11 @@ import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
 import { colors, commonStyles } from "../styles/theme";
 
-export default function AnimatedBrandTitle({ children, animationTrigger = 0 }) {
+export default function AnimatedBrandTitle({
+  children,
+  animationTrigger = 0,
+  containerStyle,
+}) {
   const titleAnimation = useRef(new Animated.Value(0)).current;
   const shineAnimation = useRef(new Animated.Value(-220)).current;
 
@@ -31,7 +35,7 @@ export default function AnimatedBrandTitle({ children, animationTrigger = 0 }) {
   }, [animationTrigger, shineAnimation, titleAnimation]);
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, containerStyle]}>
       <Animated.Text
         style={[
           commonStyles.title,

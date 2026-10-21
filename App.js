@@ -93,7 +93,7 @@ export default function App() {
           </Stack.Screen>
           <Stack.Screen
             name="GameDetails"
-            options={{ title: "Detalhes", headerShown: true }}
+            options={{ title: "Detalhes", headerShown: false }}
           >
             {(props) => (
               <GameDetailsScreen
