@@ -37,6 +37,12 @@ Quando a API não está disponível, o app utiliza o catálogo local em `src/dat
 - **Persistência local:** `App.js` utiliza `@react-native-async-storage/async-storage` com a chave `@gameshelf/library`.
 - **Regras da biblioteca:** `src/utils/libraryHelpers.js` contém as funções de adicionar, alterar status, atualizar observações e remover jogos.
 
+## Vídeo de demonstração
+
+demo/demo.mp4
+
+Link do Drive: https://drive.google.com/file/d/1aiWV35jZJ8WTOGjPvdREas_fdKWLEoUT/view?usp=drive_link
+
 ## Como executar
 
 ```bash
