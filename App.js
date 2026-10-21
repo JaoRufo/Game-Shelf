@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import MainScreen from "./src/screens/MainScreen";
+import ExploreScreen from "./src/screens/ExploreScreen";
 import GameDetailsScreen from "./src/screens/GameDetailsScreen";
 import LibraryScreen from "./src/screens/LibraryScreen";
 import StartupSplash from "./src/components/StartupSplash";
@@ -55,78 +56,74 @@ export default function App() {
   }, [library, storageReady]);
   const addGame = (game, status, notes) =>
     setLibrary((current) => addToLibrary(current, game, status, notes));
+  const handleNotesChange = (id, notes) =>
+    setLibrary((current) => updateLibraryNotes(current, id, notes));
+  const handleStatusChange = (id, status) =>
+    setLibrary((current) => updateLibraryStatus(current, id, status));
+  const handleRemove = (id) =>
+    setLibrary((current) => removeFromLibrary(current, id));
   if (showSplash) return <StartupSplash />;
   return (
     <NavigationContainer>
       <SafeAreaProvider>
         <StatusBar style="light" />
         <Stack.Navigator
-        screenOptions={{
-          animation: "slide_from_right",
-          headerShown: false,
-          headerStyle: { backgroundColor: colors.surface },
-          headerTintColor: colors.text,
-          headerTitleStyle: { fontWeight: "700" },
-          contentStyle: { backgroundColor: colors.background },
-        }}
+          screenOptions={{
+            animation: "slide_from_right",
+            headerShown: false,
+            headerStyle: { backgroundColor: colors.surface },
+            headerTintColor: colors.text,
+            headerTitleStyle: { fontWeight: "700" },
+            contentStyle: { backgroundColor: colors.background },
+          }}
         >
-        <Stack.Screen name="Main" options={{ headerShown: false, header: () => null, headerLargeTitle: false }}>
-          {(props) => (
-            <MainScreen
-              {...props}
-              library={library}
-              onNotesChange={(id, notes) =>
-                setLibrary((current) => updateLibraryNotes(current, id, notes))
-              }
-              onStatusChange={(id, status) =>
-                setLibrary((current) => updateLibraryStatus(current, id, status))
-              }
-              onRemove={(id) => setLibrary((current) => removeFromLibrary(current, id))}
-            />
-          )}
-        </Stack.Screen>
-        <Stack.Screen name="GameDetails" options={{ title: "Detalhes", headerShown: true }}>
-          {(props) => (
-            <GameDetailsScreen
-              {...props}
-              route={{
-                ...props.route,
-                params: {
-                  ...props.route.params,
-                  library,
-                  onAdd: addGame,
-                  onStatusChange: (id, status) =>
-                    setLibrary((current) =>
-                      updateLibraryStatus(current, id, status),
-                    ),
-                  onRemove: (id) =>
-                    setLibrary((current) => removeFromLibrary(current, id)),
-                  onNotesChange: (id, notes) =>
-                    setLibrary((current) => updateLibraryNotes(current, id, notes)),
-                },
-              }}
-            />
-          )}
-        </Stack.Screen>
-        <Stack.Screen name="Library" options={{ title: "Meu inventário" }}>
-          {(props) => (
-            <LibraryScreen
-              {...props}
-              library={library}
-              onStatusChange={(id, status) =>
-                setLibrary((current) =>
-                  updateLibraryStatus(current, id, status),
-                )
-              }
-              onRemove={(id) =>
-                setLibrary((current) => removeFromLibrary(current, id))
-              }
-            />
-          )}
-        </Stack.Screen>
+          <Stack.Screen name="Main">
+            {(props) => (
+              <MainScreen
+                {...props}
+                library={library}
+                onNotesChange={handleNotesChange}
+                onStatusChange={handleStatusChange}
+                onRemove={handleRemove}
+              />
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="Explore" options={{ headerShown: false }}>
+            {(props) => <ExploreScreen {...props} />}
+          </Stack.Screen>
+          <Stack.Screen
+            name="GameDetails"
+            options={{ title: "Detalhes", headerShown: true }}
+          >
+            {(props) => (
+              <GameDetailsScreen
+                {...props}
+                route={{
+                  ...props.route,
+                  params: {
+                    ...props.route.params,
+                    library,
+                    onAdd: addGame,
+                    onStatusChange: handleStatusChange,
+                    onRemove: handleRemove,
+                    onNotesChange: handleNotesChange,
+                  },
+                }}
+              />
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="Library" options={{ title: "Meu inventário" }}>
+            {(props) => (
+              <LibraryScreen
+                {...props}
+                library={library}
+                onStatusChange={handleStatusChange}
+                onRemove={handleRemove}
+              />
+            )}
+          </Stack.Screen>
         </Stack.Navigator>
       </SafeAreaProvider>
     </NavigationContainer>
   );
 }
-

@@ -6,7 +6,6 @@ export const colors = {
   surfaceElevated: "#202640",
   border: "#303855",
   primary: "#8b5cf6",
-  primaryDark: "#6d3fd1",
   success: "#35d07f",
   danger: "#f26d78",
   text: "#f6f7fb",
@@ -18,12 +17,6 @@ export const commonStyles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 32 },
   title: { color: colors.text, fontSize: 28, fontWeight: "800" },
   subtitle: { color: colors.muted, fontSize: 14, lineHeight: 20, marginTop: 6 },
-  sectionTitle: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 12,
-  },
   message: {
     color: colors.muted,
     textAlign: "center",
